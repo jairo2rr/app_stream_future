@@ -2,9 +2,11 @@ import 'dart:math';
 
 import 'package:app_stream_future/bloc/connection_manager.dart';
 import 'package:app_stream_future/bloc/message_manager.dart';
+import 'package:app_stream_future/bloc/user_session_manager.dart';
 import 'package:app_stream_future/core/utils/network_image_loader.dart';
 import 'package:app_stream_future/presentation/contact_item.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'presentation/image_loader.dart';
 
@@ -42,12 +44,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   ConnectionManager connectionManager = ConnectionManager();
   MessageManager messageManager = MessageManager();
-  NetworkImageLoader networkLoader = NetworkImageLoader();
+  ImageLoader networkLoader = NetworkImageLoader();
+  UserSessionManager userSessionManager = UserSessionManager();
 
   final messageTextController = TextEditingController();
   final paddingCard = const EdgeInsets.all(8.0);
   int? idImageRandom;
-  Exception mainException = Exception();
+  String? messageDisplayed;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,8 +106,21 @@ class _MyHomePageState extends State<MyHomePage> {
                                     onChanged: (newValue) {
                                       connectionManager
                                           .updateConnectionStatus(newValue);
+                                      if(newValue) userSessionManager.activateSession();
                                     });
-                              })
+                              }),
+                          Row(children: [
+                            const Text("Copy token"),
+                            IconButton(onPressed: (){
+                              var userToken = userSessionManager.userToken;
+                              if(userToken != null){
+                                Clipboard.setData(ClipboardData(text: userToken));
+                                print("Token copied to clipboard.");
+                              }else{
+                                print("Token not found. User is not connected.");
+                              }
+                            }, icon: const Icon(Icons.copy))
+                          ])
                         ],
                       ),
                     ),
@@ -124,9 +141,13 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           IconButton(
                               onPressed: () {
-                                String message = messageTextController.text.trim();
+                                String message =
+                                    messageTextController.text.trim();
                                 if (message.isNotEmpty) {
-                                  messageManager.updateMessageList(time:DateTime.now().millisecondsSinceEpoch, message: messageTextController.text);
+                                  messageManager.updateMessageList(
+                                      time:
+                                          DateTime.now().millisecondsSinceEpoch,
+                                      message: messageTextController.text);
                                   messageTextController.clear();
                                 }
                               },
@@ -141,13 +162,22 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Column(
                         children: [
                           const Text("Load an image!"),
-                          ImageLoader(idImage: idImageRandom, networkLoader: networkLoader),
+                          ImageContent(
+                              idImage: idImageRandom,
+                              networkLoader: networkLoader,
+                              onGetMessage: (messageFromImage){
+                                setState(() {
+                                  messageDisplayed = messageFromImage;
+                                });
+                              },
+                          ),
+                          Text(messageDisplayed ?? ""),
                           FilledButton(
-                              onPressed: (){
-                                  setState(() {
-                                    idImageRandom = Random().nextInt(10);
-                                  });
-                                }, 
+                              onPressed: () {
+                                setState(() {
+                                  idImageRandom = Random().nextInt(10);
+                                });
+                              },
                               child: const Text("Get"))
                         ],
                       ),
