@@ -3,10 +3,13 @@ import 'dart:math';
 import 'package:app_stream_future/bloc/connection_manager.dart';
 import 'package:app_stream_future/bloc/message_manager.dart';
 import 'package:app_stream_future/bloc/user_session_manager.dart';
+import 'package:app_stream_future/core/navigation/app_pages.dart';
+import 'package:app_stream_future/core/navigation/app_routes.dart';
 import 'package:app_stream_future/core/utils/network_image_loader.dart';
 import 'package:app_stream_future/presentation/contact_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 import 'presentation/image_loader.dart';
 
@@ -20,14 +23,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Stream and Future App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Stream - Future App'),
+      initialRoute: AppRoutes.HOME,
+      getPages: AppPages.routes,
     );
   }
 }
@@ -47,8 +51,8 @@ class _MyHomePageState extends State<MyHomePage> {
   ImageLoader networkLoader = NetworkImageLoader();
   UserSessionManager userSessionManager = UserSessionManager();
 
-  final messageTextController = TextEditingController();
-  final paddingCard = const EdgeInsets.all(8.0);
+  final _messageTextController = TextEditingController();
+  final _paddingCard = const EdgeInsets.all(8.0);
   int? idImageRandom;
   String? messageDisplayed;
 
@@ -93,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   Card(
                     child: Container(
-                      padding: paddingCard,
+                      padding: _paddingCard,
                       child: Column(
                         children: [
                           const Text("Connection"),
@@ -128,12 +132,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   const SizedBox(height: 20.0),
                   Card(
                     child: Container(
-                      padding: paddingCard,
+                      padding: _paddingCard,
                       child: Row(
                         children: [
                           Expanded(
                             child: TextField(
-                              controller: messageTextController,
+                              controller: _messageTextController,
                               decoration: const InputDecoration(
                                   border: OutlineInputBorder(),
                                   hintText: "Enter a message..."),
@@ -142,13 +146,13 @@ class _MyHomePageState extends State<MyHomePage> {
                           IconButton(
                               onPressed: () {
                                 String message =
-                                    messageTextController.text.trim();
+                                    _messageTextController.text.trim();
                                 if (message.isNotEmpty) {
                                   messageManager.updateMessageList(
                                       time:
                                           DateTime.now().millisecondsSinceEpoch,
-                                      message: messageTextController.text);
-                                  messageTextController.clear();
+                                      message: _messageTextController.text);
+                                  _messageTextController.clear();
                                 }
                               },
                               icon: const Icon(Icons.send))
@@ -158,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   Card(
                     child: Container(
-                      padding: paddingCard,
+                      padding: _paddingCard,
                       child: Column(
                         children: [
                           const Text("Load an image!"),
@@ -225,19 +229,24 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     Expanded(
                         flex: 0,
-                        child: Row(
-                          children: [
-                            const Text("Messages",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(width: 8.0),
-                            StreamBuilder(
-                                stream: messageManager.messageCounter,
-                                builder: (_, AsyncSnapshot<int> snapshot) {
-                                  return CircleAvatar(
-                                      backgroundColor: Colors.green,
-                                      child: Text("${snapshot.data ?? 0}"));
-                                })
-                          ],
+                        child: GestureDetector(
+                          onTap: (){
+                            Get.toNamed(AppRoutes.MESSAGES);
+                          },
+                          child: Row(
+                            children: [
+                              const Text("Messages",
+                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 8.0),
+                              StreamBuilder(
+                                  stream: messageManager.messageCounter,
+                                  builder: (_, AsyncSnapshot<int> snapshot) {
+                                    return CircleAvatar(
+                                        backgroundColor: Colors.green,
+                                        child: Text("${snapshot.data ?? 0}"));
+                                  })
+                            ],
+                          ),
                         ))
                   ],
                 ),
