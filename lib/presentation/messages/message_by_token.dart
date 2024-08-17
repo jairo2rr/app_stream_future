@@ -2,14 +2,14 @@ import 'package:app_stream_future/bloc/user_session_manager.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
-class MessagesToken extends StatefulWidget {
-  const MessagesToken({super.key});
+class MessagesTokenPage extends StatefulWidget {
+  const MessagesTokenPage({super.key});
 
   @override
-  State<MessagesToken> createState() => _MessagesTokenState();
+  State<MessagesTokenPage> createState() => _MessagesTokenPageState();
 }
 
-class _MessagesTokenState extends State<MessagesToken> {
+class _MessagesTokenPageState extends State<MessagesTokenPage> {
   final _paddingCard = const EdgeInsets.all(8.0);
   final TextEditingController _tokenTextController = TextEditingController();
   final UserSessionManager _userSessionManager = UserSessionManager();
