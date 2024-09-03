@@ -1,7 +1,7 @@
 
 import 'package:app_stream_future/core/navigation/app_routes.dart';
-import 'package:app_stream_future/presentation/home/home_page.dart';
-import 'package:app_stream_future/presentation/messages/message_by_token.dart';
+import 'package:app_stream_future/presentation/widgets/home/home_page.dart';
+import 'package:app_stream_future/presentation/widgets/messages/message_by_token.dart';
 import 'package:get/get.dart';
 
 class AppPages{

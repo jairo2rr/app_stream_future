@@ -1,7 +1,9 @@
 import 'package:app_stream_future/core/constants/asset_paths.dart';
 import 'package:app_stream_future/core/exceptions/image_exception.dart';
-import 'package:app_stream_future/core/utils/network_image_loader.dart';
+import 'package:app_stream_future/core/utils/image_loader.dart';
+import 'package:app_stream_future/presentation/controller/image_loader_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ImageContent extends StatefulWidget {
   final int? idImage;
@@ -16,33 +18,33 @@ class ImageContent extends StatefulWidget {
 }
 
 class _ImageContentState extends State<ImageContent> {
-
-  String? errorMessage;
+  ImageLoaderController imageController = Get.find();
+  String? _errorMessage;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         FutureBuilder<String>(
-          future: widget.networkLoader.loadImage(widget.idImage ?? 0),
+          future: widget.networkLoader.loadImage(widget.idImage?.toString() ?? "0"),
           builder: (_, AsyncSnapshot<String> snapshot) {
             if (widget.idImage == null || snapshot.connectionState == ConnectionState.waiting) {
               return Image.asset(AssetPaths.defaultImage);
             } else if (snapshot.hasError) {
               print("Has an error");
-              if (errorMessage == null) {
+              if (_errorMessage == null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   setState(() {
-                    errorMessage = (snapshot.error as CustomException).message;
+                    _errorMessage = (snapshot.error as CustomException).message;
                   });
                 });
               }
               return Image.asset(AssetPaths.errorImage);
             } else if (snapshot.hasData) {
-              if(errorMessage != null){
+              if(_errorMessage != null){
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   setState(() {
-                    errorMessage=null;
+                    _errorMessage=null;
                   });
                 });
               }
@@ -57,7 +59,7 @@ class _ImageContentState extends State<ImageContent> {
             }
           },
         ),
-        Text(errorMessage ?? ""), // Mostrar el mensaje de error
+        Text(_errorMessage ?? ""),
       ],
     );
   }
